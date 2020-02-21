@@ -1,0 +1,17 @@
+name: pirl-cifar
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - pandas=1.0.1
+  - python=3.7
+  - pip
+  - pytorch=1.1
+  - torchvision
+  - opencv
+  - matplotlib
+  - jupyterlab
+  - nb_conda_kernels
+  - pip:
+    - torchtext
+    - torchviz
