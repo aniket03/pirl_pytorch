@@ -1,0 +1,6 @@
+.idea/
+cifar_data/
+__pycache__
+.DS_Store
+weights/
+e1_test_observations.csv
