@@ -28,6 +28,7 @@ if __name__ == '__main__':
                         help='learning rate (default: 0.01)')
     parser.add_argument('--weight-decay', type=float, default=5e-4,
                         help='Weight decay constant (default: 5e-4)')
+    parser.add_argument('--patience-for-lr-decay', type=int, default=10)
     parser.add_argument('--experiment-name', type=str, default='e1_resnet18_')
     args = parser.parse_args()
 
@@ -84,7 +85,8 @@ if __name__ == '__main__':
     # Set device on which training is done. Plus optimizer to use.
     model_to_train.to(device)
     sgd_optimizer = optim.SGD(model_to_train.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay_const)
-    scheduler = ReduceLROnPlateau(sgd_optimizer, 'min', patience=2, verbose=True, min_lr=1e-5)
+    scheduler = ReduceLROnPlateau(sgd_optimizer, 'min', patience=args.patience_for_lr_decay,
+                                  verbose=True, min_lr=1e-5)
 
     # Start training
     model_train_test_obj = ModelTrainTest(model_to_train, device, model_file_path)
