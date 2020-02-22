@@ -11,6 +11,7 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import SubsetRandomSampler
 
+from common_constants import PAR_DATA_DIR, PAR_WEIGHTS_DIR, PAR_OBSERVATIONS_DIR
 from dataset_helpers import def_train_transform, def_test_transform
 from resnet import resnet18
 from train_test_helper import ModelTrainTest
@@ -34,16 +35,16 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Define the file_path where trained model will be saved
-    model_file_path = os.path.join('weights/', args.experiment_name)
+    model_file_path = os.path.join(PAR_WEIGHTS_DIR, args.experiment_name)
 
     # Define train_set, val_set and test_set objects
-    train_set = torchvision.datasets.CIFAR10(root='./cifar_data', train=True,
+    train_set = torchvision.datasets.CIFAR10(root=PAR_DATA_DIR, train=True,
                                             download=True, transform=def_train_transform)
     # val_set is created separately because it uses separate data_transform and sampling validation set
     # from train_set would have resulted in using data_transform used with train_set
-    val_set = torchvision.datasets.CIFAR10(root='./cifar_data', train=True,
+    val_set = torchvision.datasets.CIFAR10(root=PAR_DATA_DIR, train=True,
                                            download=True, transform=def_test_transform)
-    test_set = torchvision.datasets.CIFAR10(root='./cifar_data', train=False, download=True,
+    test_set = torchvision.datasets.CIFAR10(root=PAR_DATA_DIR, train=False, download=True,
                                            transform=def_test_transform)
 
     # Define train, validation and test data loaders
@@ -105,7 +106,7 @@ if __name__ == '__main__':
     observations_df['val loss'] = val_losses
     observations_df['train acc'] = train_accs
     observations_df['val acc'] = val_accs
-    observations_file_path = args.experiment_name + '_observations.csv'
+    observations_file_path = os.path.join(PAR_OBSERVATIONS_DIR, args.experiment_name + '_observations.csv')
     observations_df.to_csv(observations_file_path)
 
 
