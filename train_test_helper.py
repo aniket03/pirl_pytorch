@@ -24,7 +24,8 @@ class ModelTrainTest():
         self.train_loss = 1e9
         self.val_loss = 1e9
 
-    def train(self, optimizer, epoch, params_max_norm, train_data_loader, val_data_loader):
+    def train(self, optimizer, epoch, params_max_norm, train_data_loader, val_data_loader,
+              no_train_samples, no_val_samples):
         self.network.train()
         train_loss, correct, cnt_batches = 0, 0, 0
 
@@ -47,21 +48,20 @@ class ModelTrainTest():
             del data, target, output
 
         train_loss /= cnt_batches
-        val_loss, val_acc = self.test(epoch, val_data_loader)
+        val_loss, val_acc = self.test(epoch, val_data_loader, no_val_samples)
 
         if val_loss < self.val_loss - self.threshold:
             self.val_loss = val_loss
             torch.save(self.network.state_dict(), self.model_file_path)
 
-        train_acc = correct / len(train_data_loader.dataset)
+        train_acc = correct / no_train_samples
 
         print('\nAfter epoch {} - Train set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            epoch, train_loss, correct, len(train_data_loader.dataset),
-            100. * correct / len(train_data_loader.dataset)))
+            epoch, train_loss, correct, no_train_samples, 100. * correct / no_train_samples))
 
         return train_loss, train_acc, val_loss, val_acc
 
-    def test(self, epoch, test_data_loader):
+    def test(self, epoch, test_data_loader, no_test_samples):
         self.network.eval()
         test_loss = 0
         correct = 0
@@ -75,10 +75,9 @@ class ModelTrainTest():
 
             del data, target, output
 
-        test_loss /= len(test_data_loader.dataset)
-        test_acc = correct / len(test_data_loader.dataset)
+        test_loss /= no_test_samples
+        test_acc = correct / no_test_samples
         print('\nAfter epoch {} - Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            epoch, test_loss, correct, len(test_data_loader.dataset),
-            100. * correct / len(test_data_loader.dataset)))
+            epoch, test_loss, correct, no_test_samples, 100. * correct / no_test_samples))
 
         return  test_loss, test_acc

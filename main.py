@@ -92,7 +92,8 @@ if __name__ == '__main__':
     for epoch_no in range(epochs):
         train_loss, train_acc, val_loss, val_acc = model_train_test_obj.train(
             sgd_optimizer, epoch_no, params_max_norm=4,
-            train_data_loader=train_loader, val_data_loader=val_loader
+            train_data_loader=train_loader, val_data_loader=val_loader,
+            no_train_samples=len(train_indices), no_val_samples=len(val_indices)
         )
         train_losses.append(train_loss)
         val_losses.append(val_loss)
