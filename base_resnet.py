@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
@@ -189,27 +188,3 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         return x
-
-
-class ClassificationResNet(nn.Module):
-
-    def __init__(self, resnet_module, num_classes):
-        super(ClassificationResNet, self).__init__()
-        self.resnet_module = resnet_module
-        self.fc = nn.Linear(512, num_classes)
-
-    def forward(self, input_batch):
-
-        # Data returned by data loaders is of the shape (batch_size, no_channels, h_patch, w_patch)
-        final_feat_vectors = self.resnet_module(input_batch)
-        x = F.log_softmax(self.fc(final_feat_vectors))
-
-        return x
-
-
-def classifier_resnet18(num_classes, **kwargs):
-    r"""ResNet-18 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
-    """
-    base_resnet18 = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
-    return ClassificationResNet(base_resnet18, num_classes)

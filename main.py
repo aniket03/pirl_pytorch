@@ -13,7 +13,7 @@ from torch.utils.data import SubsetRandomSampler
 
 from common_constants import PAR_DATA_DIR, PAR_WEIGHTS_DIR, PAR_OBSERVATIONS_DIR
 from dataset_helpers import def_train_transform, def_test_transform
-from resnet import classifier_resnet18
+from models import classifier_resnet18
 from train_test_helper import ModelTrainTest
 
 if __name__ == '__main__':
