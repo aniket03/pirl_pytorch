@@ -99,9 +99,9 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
+    def __init__(self, block, layers, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
-                 norm_layer=None, siamese_deg=None):
+                 norm_layer=None):
         super(ResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -118,7 +118,6 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
-        self.siamese_deg = siamese_deg
 
         self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -133,11 +132,6 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
                                        dilate=replace_stride_with_dilation[2])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-
-        if self.siamese_deg is None:
-            self.fc = nn.Linear(512 * block.expansion, num_classes)
-        else:
-            self.fc = nn.Linear(512 * block.expansion * self.siamese_deg, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -180,7 +174,7 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def get_feature_vectors(self, input_batch):
+    def forward(self, input_batch):
         # Each input_batch would be of shape (batch_size, color_channels, h, w)
         x = self.conv1(input_batch)
         x = self.bn1(x)
@@ -196,40 +190,26 @@ class ResNet(nn.Module):
         x = torch.flatten(x, 1)
         return x
 
+
+class ClassificationResNet(nn.Module):
+
+    def __init__(self, resnet_module, num_classes):
+        super(ClassificationResNet, self).__init__()
+        self.resnet_module = resnet_module
+        self.fc = nn.Linear(512, num_classes)
+
     def forward(self, input_batch):
 
-        # Data returned by data loaders is of the shape (batch_size, no_patches, h_patch, w_patch)
-        # That's why named input to patches_batch
-
-        if self.siamese_deg is None:
-            final_feat_vectors = self.get_feature_vectors(input_batch)
-            x = F.log_softmax(self.fc(final_feat_vectors))
-        else:
-            final_feat_vectors = None
-            for patch_ind in range(self.siamese_deg):
-                # Each patch_batch would be of shape (batch_size, color_channels, h_patch, w_patch)
-                patch_batch = input_batch[:, patch_ind, :, :, :]
-                patch_batch_features = self.get_feature_vectors(patch_batch)
-
-                if patch_ind == 0:
-                    final_feat_vectors = patch_batch_features
-                else:
-                    final_feat_vectors = torch.cat([final_feat_vectors, patch_batch_features], dim=1)
-            x = F.dropout(final_feat_vectors)
-            x = F.log_softmax(self.fc(x))
+        # Data returned by data loaders is of the shape (batch_size, no_channels, h_patch, w_patch)
+        final_feat_vectors = self.resnet_module(input_batch)
+        x = F.log_softmax(self.fc(final_feat_vectors))
 
         return x
 
 
-
-def _resnet(block, layers, **kwargs):
-    model = ResNet(block, layers, **kwargs)
-
-    return model
-
-
-def resnet18(**kwargs):
+def classifier_resnet18(num_classes, **kwargs):
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
     """
-    return _resnet(BasicBlock, [2, 2, 2, 2], **kwargs)
+    base_resnet18 = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
+    return ClassificationResNet(base_resnet18, num_classes)

@@ -13,7 +13,7 @@ from torch.utils.data import SubsetRandomSampler
 
 from common_constants import PAR_DATA_DIR, PAR_WEIGHTS_DIR, PAR_OBSERVATIONS_DIR
 from dataset_helpers import def_train_transform, def_test_transform
-from resnet import resnet18
+from resnet import classifier_resnet18
 from train_test_helper import ModelTrainTest
 
 if __name__ == '__main__':
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     weight_decay_const = args.weight_decay
 
     # If using Resnet18
-    model_to_train = resnet18(num_classes=num_outputs, siamese_deg=None)
+    model_to_train = classifier_resnet18(num_classes=num_outputs)
 
     # Set device on which training is done. Plus optimizer to use.
     model_to_train.to(device)
@@ -111,7 +111,3 @@ if __name__ == '__main__':
     observations_df['val acc'] = val_accs
     observations_file_path = os.path.join(PAR_OBSERVATIONS_DIR, args.experiment_name + '_observations.csv')
     observations_df.to_csv(observations_file_path)
-
-
-
-

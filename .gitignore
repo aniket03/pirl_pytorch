@@ -3,4 +3,5 @@ cifar_data/
 __pycache__
 .DS_Store
 weights/
+observations_dir/
 e1_test_observations.csv
