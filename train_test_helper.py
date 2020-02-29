@@ -39,7 +39,7 @@ class PIRLModelTrainTest():
         self.threshold = threshold
         self.train_loss = 1e9
         self.val_loss = 1e9
-        self.all_images_mem = torch.tensor(all_images_mem, dtype=torch.float)
+        self.all_images_mem = torch.tensor(all_images_mem, dtype=torch.float).to(device)
         self.train_image_indices = train_image_indices
         self.val_image_indices = val_image_indices
         self.temp_parameter = temp_parameter
