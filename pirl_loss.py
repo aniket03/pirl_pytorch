@@ -2,21 +2,14 @@ import torch
 import numpy as np
 
 
-def get_img_pair_probs(vi_batch, vi_t_batch, all_images_mem, batch_img_indices, all_img_indices, temp_parameter):
+def get_img_pair_probs(vi_batch, vi_t_batch, mn_arr, temp_parameter):
     """
     Returns the probability that feature representation for image I and I_t belong to same distribution.
     :param vi_batch: Feature representation for batch of images I
     :param vi_t_batch: Feature representation for batch containing transformed versions of I.
-    :param all_images_mem: Memory bank of feature representations for other images
-    :param batch_img_indices: Indices of images present in provided batch
-    :param all_img_indices: image indices of the images present in memory bank
+    :param mn_arr: Memory bank of feature representations for negative images for current batch
     :param temp_parameter: The temperature parameter
-    :return:
     """
-
-    # Find images that will be used in memory bank of negatives
-    mn_indices = list(set(all_img_indices) - set(batch_img_indices))[:6400]
-    mn_arr = all_images_mem[mn_indices]
 
     # L2 normalize vi, vi_t and memory bank representations
     vi_norm_arr = torch.norm(vi_batch, dim=1, keepdim=True)
@@ -44,16 +37,18 @@ def get_img_pair_probs(vi_batch, vi_t_batch, all_images_mem, batch_img_indices, 
     return batch_prob_arr
 
 
-def loss_pirl(vi_batch, vi_t_batch, all_images_mem, batch_img_indices, all_img_indices, temp_parameter):
-    img_pair_probs_arr = get_img_pair_probs(vi_batch, vi_t_batch, all_images_mem,
-                                            batch_img_indices, all_img_indices, temp_parameter)
+def loss_pirl(img_pair_probs_arr, img_mem_rep_probs_arr):
+    """
+    Returns the average of [-log(prob(img_pair_probs_arr)) - log(prob(img_mem_rep_probs_arr))]
+    :param img_pair_probs_arr: Prob vector of batch of images I and I_t to belong to same data distribution.
+    :param img_mem_rep_probs_arr: Prob vector of batch of I and mem_bank_rep of I to belong to same data distribution
+    """
 
+    # Get 1st term of loss
     neg_log_img_pair_probs = -1 * torch.log(img_pair_probs_arr)
     loss_i_i_t = torch.sum(neg_log_img_pair_probs) / neg_log_img_pair_probs.size()[0]
 
-    mem_rep_in_batch_imgs = all_images_mem[batch_img_indices]
-    img_mem_rep_probs_arr = get_img_pair_probs(vi_batch, mem_rep_in_batch_imgs, all_images_mem,
-                                            batch_img_indices, all_img_indices, temp_parameter)
+    # Get 2nd term of loss
     neg_log_img_mem_rep_probs_arr = -1 * torch.log(img_mem_rep_probs_arr)
     loss_i_mem_i = torch.sum(neg_log_img_mem_rep_probs_arr) / neg_log_img_mem_rep_probs_arr.size()[0]
 
@@ -66,17 +61,20 @@ if __name__ == '__main__':
     # Test get_img_pair_probs function
     vi_batch = torch.randn(256, 128)
     vi_t_batch = torch.randn(256, 128)
-    all_images_mem = torch.randn(50000, 128)
-    batch_img_indices = np.arange(25000, 25000 + 256)
-    all_images_indices = np.arange(50000)
+    mn_arr = torch.randn(6400, 128)
+    mem_rep_of_batch_imgs = torch.randn(256, 128)
     temp_parameter = 1.5
-    prob_vector = get_img_pair_probs(vi_batch, vi_t_batch, all_images_mem, batch_img_indices,
-                                     all_images_indices, temp_parameter)
-    print (prob_vector.shape)
 
-    loss_val = loss_pirl(
-        vi_batch, vi_t_batch, all_images_mem, batch_img_indices, all_images_indices, temp_parameter
-    )
+    # Prob vector between I and I_t
+    img_pair_probs_arr = get_img_pair_probs(vi_batch, vi_t_batch, mn_arr, temp_parameter)
+    print (img_pair_probs_arr.shape)
+
+    # Prob vector between I and mem bank representation of I
+    img_mem_rep_probs_arr = get_img_pair_probs(vi_batch, mem_rep_of_batch_imgs, mn_arr, temp_parameter)
+    print (img_mem_rep_probs_arr.shape)
+
+    # Final loss
+    loss_val = loss_pirl(img_pair_probs_arr, img_mem_rep_probs_arr)
 
     print (loss_val)
 
