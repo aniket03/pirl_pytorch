@@ -1,7 +1,8 @@
 import torch
 import torch.nn.functional as F
 
-from torch.autograd import Variable
+import numpy as np
+
 from torch.nn.utils import clip_grad_norm_
 
 from pirl_loss import loss_pirl, get_img_pair_probs
@@ -40,8 +41,8 @@ class PIRLModelTrainTest():
         self.train_loss = 1e9
         self.val_loss = 1e9
         self.all_images_mem = torch.tensor(all_images_mem, dtype=torch.float).to(device)
-        self.train_image_indices = train_image_indices
-        self.val_image_indices = val_image_indices
+        self.train_image_indices = train_image_indices.copy()
+        self.val_image_indices = val_image_indices.copy()
         self.temp_parameter = temp_parameter
         self.beta = beta
 
@@ -64,6 +65,7 @@ class PIRLModelTrainTest():
             vi_batch, vi_t_batch = self.network(i_batch, i_t_patches_batch)
 
             # Prepare memory bank of negatives for current batch
+            np.random.shuffle(self.train_image_indices)
             mn_indices = list(set(self.train_image_indices) - set(batch_img_indices))[:6400]
             mn_arr = self.all_images_mem[mn_indices]
 
@@ -129,6 +131,7 @@ class PIRLModelTrainTest():
             vi_batch, vi_t_batch = self.network(i_batch, i_t_patches_batch)
 
             # Prepare memory bank of negatives for current batch
+            np.random.shuffle(self.val_image_indices)
             mn_indices = list(set(self.val_image_indices) - set(batch_img_indices))[:6400]
             mn_arr = self.all_images_mem[mn_indices]
 
