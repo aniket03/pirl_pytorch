@@ -149,6 +149,13 @@ class PIRLModelTrainTest():
             test_loss += loss.item()
             cnt_batches += 1
 
+            # Update memory bank representation for images from current batch
+            all_images_mem_new = self.all_images_mem.clone().detach()
+            all_images_mem_new[batch_img_indices] = (self.beta * all_images_mem_new[batch_img_indices]) + \
+                                                    ((1 - self.beta) * vi_batch)
+            self.all_images_mem = all_images_mem_new.clone().detach()
+
+
             del i_batch, i_t_patches_batch, vi_batch, vi_t_batch, mn_arr, mem_rep_of_batch_imgs
             del img_mem_rep_probs_arr, img_pair_probs_arr
 
