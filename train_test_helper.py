@@ -105,6 +105,8 @@ class PIRLModelTrainTest():
         if val_loss < self.val_loss - self.threshold:
             self.val_loss = val_loss
             torch.save(self.network.state_dict(), self.model_file_path)
+        elif epoch % 10 == 0:
+            torch.save(self.network.state_dict(), self.model_file_path + '_epoch_{}'.format(epoch))
 
         train_acc = correct / no_train_samples
 
