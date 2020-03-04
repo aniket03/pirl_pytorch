@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.models import resnet18, resnet34, resnet50
 
 from base_resnet import ResNet, BasicBlock
 
@@ -15,18 +16,40 @@ class ClassificationResNet(nn.Module):
     def forward(self, input_batch):
 
         # Data returned by data loaders is of the shape (batch_size, no_channels, h_patch, w_patch)
-        final_feat_vectors = self.resnet_module(input_batch)
+        resnet_feat_vectors = self.resnet_module(input_batch)
+        final_feat_vectors = torch.flatten(resnet_feat_vectors, 1)
         x = F.log_softmax(self.fc(final_feat_vectors))
 
         return x
 
 
-def classifier_resnet18(num_classes, **kwargs):
-    r"""ResNet-18 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+def get_base_resnet_module(model_type):
     """
-    base_resnet18 = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
-    return ClassificationResNet(base_resnet18, num_classes)
+    Returns the backbone network for required resnet architecture, specified as model_type
+    :param model_type: Can be either of {res18, res34, res50}
+    """
+
+    if model_type == 'res18':
+        original_model = resnet18(pretrained=False)
+    elif model_type == 'res34':
+        original_model = resnet34(pretrained=False)
+    else:
+        original_model = resnet50(pretrained=False)
+    base_resnet_module = nn.Sequential(*list(original_model.children())[:-1])
+
+    return base_resnet_module
+
+
+def classifier_resnet(model_type, num_classes):
+    """
+    Returns a classification network with backbone belonging to the family of ResNets
+    :param model_type: Specifies which resnet network to employ. Can be one of {res18, res34, res50}
+    :param num_classes: The number of classes that the final network classifies it inputs into.
+    """
+
+    base_resnet_module = get_base_resnet_module(model_type)
+
+    return ClassificationResNet(base_resnet_module, num_classes)
 
 
 class PIRLResnet(nn.Module):
@@ -44,7 +67,10 @@ class PIRLResnet(nn.Module):
 
         # Run I and I_t through resnet
         vi_batch = self.resnet_module(i_batch)
+        vi_batch = torch.flatten(vi_batch, 1)
         vi_t_patches_batch = [self.resnet_module(i_t_patches_batch[:, patch_ind, :, :, :])
+                              for patch_ind in range(9)]
+        vi_t_patches_batch = [torch.flatten(vi_t_patches_batch[patch_ind], 1)
                               for patch_ind in range(9)]
 
         # Run resnet features for I and I_t via lin_project_1 layer
@@ -61,16 +87,20 @@ class PIRLResnet(nn.Module):
         return vi_batch, vi_t_batch
 
 
-def pirl_resnet18(**kwargs):
-    r"""ResNet-18 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+def pirl_resnet(model_type):
     """
-    base_resnet18 = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
-    return PIRLResnet(base_resnet18)
+    Returns a network which supports Pre-text invariant representation learning
+    with backbone belonging to the family of ResNets
+    :param model_type: Specifies which resnet network to employ. Can be one of {res18, res34, res50}
+    """
+
+    base_resnet_module = get_base_resnet_module(model_type)
+
+    return PIRLResnet(base_resnet_module)
 
 
 if __name__ == '__main__':
-    pr = pirl_resnet18()
+    pr = pirl_resnet('res18')
     image_batch = torch.randn(32, 3, 64, 64)
     tr_img_patch_batch = torch.randn(32, 9, 3, 32, 32)
 

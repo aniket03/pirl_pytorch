@@ -32,7 +32,7 @@ def get_count_correct_preds_pretext(img_pair_probs_arr, img_mem_rep_probs_arr):
 class PIRLModelTrainTest():
 
     def __init__(self, network, device, model_file_path, all_images_mem, train_image_indices,
-                 val_image_indices, temp_parameter, beta, threshold=1e-4):
+                 val_image_indices, count_negatives, temp_parameter, beta, threshold=1e-4):
         super(PIRLModelTrainTest, self).__init__()
         self.network = network
         self.device = device
@@ -43,6 +43,7 @@ class PIRLModelTrainTest():
         self.all_images_mem = torch.tensor(all_images_mem, dtype=torch.float).to(device)
         self.train_image_indices = train_image_indices.copy()
         self.val_image_indices = val_image_indices.copy()
+        self.count_negatives = count_negatives
         self.temp_parameter = temp_parameter
         self.beta = beta
 
@@ -66,7 +67,7 @@ class PIRLModelTrainTest():
 
             # Prepare memory bank of negatives for current batch
             np.random.shuffle(self.train_image_indices)
-            mn_indices = list(set(self.train_image_indices) - set(batch_img_indices))[:6400]
+            mn_indices = list(set(self.train_image_indices) - set(batch_img_indices))[:self.count_negatives]
             mn_arr = self.all_images_mem[mn_indices]
 
             # Get memory bank representation for current batch images
@@ -105,7 +106,7 @@ class PIRLModelTrainTest():
         if val_loss < self.val_loss - self.threshold:
             self.val_loss = val_loss
             torch.save(self.network.state_dict(), self.model_file_path)
-        elif epoch % 10 == 0:
+        if epoch % 10 == 0:
             torch.save(self.network.state_dict(), self.model_file_path + '_epoch_{}'.format(epoch))
 
         train_acc = correct / no_train_samples
@@ -134,7 +135,7 @@ class PIRLModelTrainTest():
 
             # Prepare memory bank of negatives for current batch
             np.random.shuffle(self.val_image_indices)
-            mn_indices = list(set(self.val_image_indices) - set(batch_img_indices))[:6400]
+            mn_indices = list(set(self.val_image_indices) - set(batch_img_indices))[:self.count_negatives]
             mn_arr = self.all_images_mem[mn_indices]
 
             # Get memory bank representation for current batch images
