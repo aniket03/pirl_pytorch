@@ -13,7 +13,7 @@ from torch.utils.data import SubsetRandomSampler
 
 from common_constants import PAR_DATA_DIR, PAR_WEIGHTS_DIR, PAR_OBSERVATIONS_DIR
 from dataset_helpers import def_train_transform, def_test_transform
-from models import classifier_resnet18, pirl_resnet18
+from models import classifier_resnet, pirl_resnet
 from network_helpers import copy_weights_between_models
 from train_test_helper import ModelTrainTest
 
@@ -21,6 +21,8 @@ if __name__ == '__main__':
 
     # Training arguments
     parser = argparse.ArgumentParser(description='CIFAR10 Train test script')
+    parser.add_argument('--model-type', type=str, default='res18',
+                        help='The network architecture to employ as backbone')
     parser.add_argument('--batch-size', type=int, default=128, metavar='N',
                         help='input batch size for training (default: 128)')
     parser.add_argument('--epochs', type=int, default=100, metavar='N',
@@ -83,8 +85,8 @@ if __name__ == '__main__':
     weight_decay_const = args.weight_decay
 
     # Define model_to_train and inherit weights from pre-trained SSL model
-    model_to_train = classifier_resnet18(num_classes=num_outputs)
-    pirl_model = pirl_resnet18()
+    model_to_train = classifier_resnet(args.model_type, num_classes=num_outputs)
+    pirl_model = pirl_resnet(args.model_type)
     pirl_model.load_state_dict(torch.load(pirl_file_path, map_location='cpu'))
     weight_copy_success = copy_weights_between_models(model_to_train, pirl_model)
 
