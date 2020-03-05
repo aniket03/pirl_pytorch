@@ -33,6 +33,7 @@ if __name__ == '__main__':
                         help='Weight decay constant (default: 5e-4)')
     parser.add_argument('--patience-for-lr-decay', type=int, default=10)
     parser.add_argument('--experiment-name', type=str, default='e1_pirl_sup_')
+    parser.add_argument('--pirl-model-name', type=str)
     args = parser.parse_args()
 
     # Identify device for holding tensors and carrying out computations
@@ -40,7 +41,7 @@ if __name__ == '__main__':
 
     # Define file path with trained SSL model and file_path where trained classification model
     # will be saved
-    pirl_file_path = os.path.join(PAR_WEIGHTS_DIR, 'e1_pirl_cifar')
+    pirl_file_path = os.path.join(PAR_WEIGHTS_DIR, args.pirl_model_name)
     model_file_path = os.path.join(PAR_WEIGHTS_DIR, args.experiment_name)
 
     # Define train_set, val_set and test_set objects
