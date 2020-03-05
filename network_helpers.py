@@ -1,6 +1,6 @@
 import torch
 
-from models import pirl_resnet18, classifier_resnet18
+from models import pirl_resnet, classifier_resnet
 
 
 def test_copy_weights(m1, m2):
@@ -46,8 +46,8 @@ def copy_weights_between_models(m1, m2):
 
 if __name__ == '__main__':
 
-    pr = pirl_resnet18()
-    cr = classifier_resnet18(num_classes=10)
+    pr = pirl_resnet('res18')
+    cr = classifier_resnet('res18', num_classes=10)
 
     copy_success = copy_weights_between_models(pr, cr)
 
