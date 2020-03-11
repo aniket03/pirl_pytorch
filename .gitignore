@@ -5,3 +5,5 @@ __pycache__
 weights/
 observations_dir/
 e1_test_observations.csv
+raw_stl10/
+stl10_data/
