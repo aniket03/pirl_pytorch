@@ -13,11 +13,6 @@ if sys.version_info >= (3, 0, 0):
 else:
     import urllib
 
-try:
-    from imageio import imsave
-except:
-    from scipy.misc import imsave
-
 print(sys.version_info)
 
 # image shape
