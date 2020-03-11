@@ -3,8 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models import resnet18, resnet34, resnet50
 
-from base_resnet import ResNet, BasicBlock
-
 
 class ClassificationResNet(nn.Module):
 
