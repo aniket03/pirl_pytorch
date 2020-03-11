@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     # Read unlabelled images and save to disk
     images = read_all_images(UNLABELLED_DATA_PATH)
-    labels = [None] * len(images)
+    labels = None
     print (images.shape)
 
     save_images(STL10_UNLABELLED_IMG_DIR, images, labels)
