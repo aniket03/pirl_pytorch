@@ -51,6 +51,29 @@ class GetCIFARDataForPIRL(Dataset):
         return [image_tensor, tensor_patches], index
 
 
+class GetSTL10Data(Dataset):
+    'Characterizes PyTorch Dataset object'
+    def __init__(self, file_paths, labels, transform):
+        'Initialization'
+        self.file_paths = file_paths
+        self.labels = labels
+        self.transform = transform
+
+    def __len__(self):
+        'Denotes the total number of samples'
+        return len(self.file_paths)
+
+    def __getitem__(self, index):
+        'Generates one sample of data'
+
+        # Select one file_path and convert to tensor object
+        image = Image.open(self.file_paths[index])
+        image_tensor = self.transform(image)
+        label = self.labels[index]
+
+        return image_tensor, label
+
+
 class GetSTL10DataForPIRL(Dataset):
     'Characterizes PyTorch Dataset object'
     def __init__(self, file_paths):

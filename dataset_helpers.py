@@ -1,7 +1,16 @@
+import os
+
 from torchvision.transforms import transforms
 
 def_train_transform = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
+    transforms.ColorJitter(brightness=[0.5, 1.5]),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+])
+
+def_train_transform_stl = transforms.Compose([
     transforms.ColorJitter(brightness=[0.5, 1.5]),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
@@ -32,6 +41,29 @@ pirl_stl10_jigsaw_patch_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
+
+
+def get_file_paths_n_labels(par_images_dir):
+    """
+    Returns all file paths for images in a directory (par_images_dir).
+    The par_images_dir is supposed to only have sub directories with each sub-directory representing a label
+    And in turn each sub-directory holding images pertaining to the label it represents
+    """
+
+    label_names = [dir_name for dir_name in os.listdir(par_images_dir)
+                   if os.path.isdir(os.path.join(par_images_dir, dir_name))]
+    label_dir_paths = [os.path.join(par_images_dir, dir_name) for dir_name in label_names]
+
+    file_paths = []
+    labels = []
+
+    for label_name, label_dir in zip(label_names, label_dir_paths):
+        file_names = [file_name for file_name in os.listdir(label_dir) if file_name[-4:]=='jpeg']
+        file_paths += [os.path.join(label_dir, file_name) for file_name in file_names]
+        labels += [int(label_name) - 1] * len(file_names)
+
+    return file_paths, labels
+
 
 def get_nine_crops(pil_image):
     """
