@@ -19,8 +19,15 @@ pirl_full_img_transform = transforms.Compose([
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
 
-pirl_jigsaw_patch_transform = transforms.Compose([
+pirl_cifar_jigsaw_patch_transform = transforms.Compose([
     transforms.RandomCrop(10, padding=2),
+    transforms.ColorJitter(brightness=[0.5, 1.5]),
+    transforms.ToTensor(),
+    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+])
+
+pirl_stl10_jigsaw_patch_transform = transforms.Compose([
+    transforms.RandomCrop(30, padding=1),
     transforms.ColorJitter(brightness=[0.5, 1.5]),
     transforms.ToTensor(),
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
