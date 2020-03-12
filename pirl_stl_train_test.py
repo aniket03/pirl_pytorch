@@ -12,8 +12,10 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import SubsetRandomSampler
 
 from common_constants import PAR_WEIGHTS_DIR, PAR_OBSERVATIONS_DIR
+from experiment_logger import log_experiment
 from get_dataset import GetSTL10DataForPIRL
 from models import pirl_resnet
+from random_seed_setter import set_random_generators_seed
 from train_test_helper import PIRLModelTrainTest
 
 
@@ -46,6 +48,9 @@ if __name__ == '__main__':
     parser.add_argument('--temp-parameter', type=float, default=0.07, help='Temperature parameter in NCE probability')
     parser.add_argument('--experiment-name', type=str, default='e1_resnet18_')
     args = parser.parse_args()
+
+    # Set random number generation seed for all packages that generate random numbers
+    set_random_generators_seed()
 
     # Identify device for holding tensors and carrying out computations
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -125,11 +130,5 @@ if __name__ == '__main__':
         val_accs.append(val_acc)
         scheduler.step(val_loss)
 
-    observations_df = pd.DataFrame()
-    observations_df['epoch count'] = [i for i in range(1, args.epochs + 1)]
-    observations_df['train loss'] = train_losses
-    observations_df['val loss'] = val_losses
-    observations_df['train acc'] = train_accs
-    observations_df['val acc'] = val_accs
-    observations_file_path = os.path.join(PAR_OBSERVATIONS_DIR, args.experiment_name + '_observations.csv')
-    observations_df.to_csv(observations_file_path)
+    # Log train-test results
+    log_experiment(args.experiment_name, args.epochs, train_losses, val_losses, train_accs, val_accs)

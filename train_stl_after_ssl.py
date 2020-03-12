@@ -17,6 +17,7 @@ from experiment_logger import log_experiment
 from get_dataset import GetSTL10Data
 from models import classifier_resnet, pirl_resnet
 from network_helpers import copy_weights_between_models
+from random_seed_setter import set_random_generators_seed
 from train_test_helper import ModelTrainTest
 
 if __name__ == '__main__':
@@ -38,6 +39,9 @@ if __name__ == '__main__':
     parser.add_argument('--experiment-name', type=str, default='e1_pirl_sup_')
     parser.add_argument('--pirl-model-name', type=str)
     args = parser.parse_args()
+
+    # Set random number generation seed for all packages that generate random numbers
+    set_random_generators_seed()
 
     # Identify device for holding tensors and carrying out computations
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
