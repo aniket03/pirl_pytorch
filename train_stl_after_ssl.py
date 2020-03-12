@@ -88,7 +88,7 @@ if __name__ == '__main__':
     # Define model_to_train and inherit weights from pre-trained SSL model
     model_to_train = classifier_resnet(args.model_type, num_classes=num_outputs)
     pirl_model = pirl_resnet(args.model_type)
-    pirl_model.load_state_dict(torch.load(pirl_file_path, map_location='cpu'))
+    pirl_model.load_state_dict(torch.load(pirl_file_path, map_location=device))
     weight_copy_success = copy_weights_between_models(model_to_train, pirl_model)
 
     if not weight_copy_success:
