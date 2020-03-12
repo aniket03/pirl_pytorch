@@ -38,6 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('--weight-decay', type=float, default=5e-4,
                         help='Weight decay constant (default: 5e-4)')
     parser.add_argument('--patience-for-lr-decay', type=int, default=10)
+    parser.add_argument('--warm-start', type=bool, default=False)
     parser.add_argument('--count-negatives', type=int, default=6400,
                         help='No of samples in memory bank of negatives')
     parser.add_argument('--beta', type=float, default=0.5, help='Exponential running average constant'
@@ -100,6 +101,10 @@ if __name__ == '__main__':
     sgd_optimizer = optim.SGD(model_to_train.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay_const)
     scheduler = ReduceLROnPlateau(sgd_optimizer, 'min', patience=args.patience_for_lr_decay,
                                   verbose=True, min_lr=1e-4)
+
+    # Initialize model weights with a previously trained model if using warm start
+    if args.warm_start and os.path.exists(model_file_path):
+        model_to_train.load_state_dict(torch.load(model_file_path, map_location=device))
 
     # Start training
     all_images_mem = np.random.randn(len_train_val_set, 128)
