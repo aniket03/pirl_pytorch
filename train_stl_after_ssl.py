@@ -11,8 +11,9 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import SubsetRandomSampler
 
-from common_constants import PAR_WEIGHTS_DIR, PAR_OBSERVATIONS_DIR
+from common_constants import PAR_WEIGHTS_DIR
 from dataset_helpers import def_train_transform_stl, def_test_transform, get_file_paths_n_labels
+from experiment_logger import log_experiment
 from get_dataset import GetSTL10Data
 from models import classifier_resnet, pirl_resnet
 from network_helpers import copy_weights_between_models
@@ -33,6 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('--weight-decay', type=float, default=5e-4,
                         help='Weight decay constant (default: 5e-4)')
     parser.add_argument('--patience-for-lr-decay', type=int, default=10)
+    parser.add_argument('--full-fine-tune', type=bool, default=False)
     parser.add_argument('--experiment-name', type=str, default='e1_pirl_sup_')
     parser.add_argument('--pirl-model-name', type=str)
     args = parser.parse_args()
@@ -125,11 +127,33 @@ if __name__ == '__main__':
         val_accs.append(val_acc)
         scheduler.step(val_loss)
 
-    observations_df = pd.DataFrame()
-    observations_df['epoch count'] = [i for i in range(1, args.epochs + 1)]
-    observations_df['train loss'] = train_losses
-    observations_df['val loss'] = val_losses
-    observations_df['train acc'] = train_accs
-    observations_df['val acc'] = val_accs
-    observations_file_path = os.path.join(PAR_OBSERVATIONS_DIR, args.experiment_name + '_observations.csv')
-    observations_df.to_csv(observations_file_path)
+    # Log train-test results
+    log_experiment(args.experiment_name + '_lin_clf', args.epochs, train_losses, val_losses, train_accs, val_accs)
+
+    # Check if layers beyond last fully connected are to be fine tuned
+    if args.full_fine_tune:
+        for name, param in model_to_train.named_parameters():
+            param.requires_grad = True
+
+    # Reset optimizer and learning rate scheduler
+    sgd_optimizer = optim.SGD(model_to_train.parameters(), lr=0.01, momentum=0.9, weight_decay=weight_decay_const)
+    scheduler = ReduceLROnPlateau(sgd_optimizer, 'min', patience=args.patience_for_lr_decay,
+                                  verbose=True, min_lr=1e-5)
+
+    # Re-start training
+    model_train_test_obj = ModelTrainTest(model_to_train, device, model_file_path)
+    train_losses, val_losses, train_accs, val_accs = [], [], [], []
+    for epoch_no in range(epochs):
+        train_loss, train_acc, val_loss, val_acc = model_train_test_obj.train(
+            sgd_optimizer, epoch_no, params_max_norm=4,
+            train_data_loader=train_loader, val_data_loader=val_loader,
+            no_train_samples=len(train_indices), no_val_samples=len(val_indices)
+        )
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        train_accs.append(train_acc)
+        val_accs.append(val_acc)
+        scheduler.step(val_loss)
+
+    # Log train-test results
+    log_experiment(args.experiment_name + '_full_ft', args.epochs, train_losses, val_losses, train_accs, val_accs)
