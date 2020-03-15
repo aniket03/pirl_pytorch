@@ -32,7 +32,7 @@ def get_count_correct_preds_pretext(img_pair_probs_arr, img_mem_rep_probs_arr):
 class PIRLModelTrainTest():
 
     def __init__(self, network, device, model_file_path, all_images_mem, train_image_indices,
-                 val_image_indices, count_negatives, temp_parameter, beta, threshold=1e-4):
+                 val_image_indices, count_negatives, temp_parameter, beta, only_train=False, threshold=1e-4):
         super(PIRLModelTrainTest, self).__init__()
         self.network = network
         self.device = device
@@ -46,6 +46,7 @@ class PIRLModelTrainTest():
         self.count_negatives = count_negatives
         self.temp_parameter = temp_parameter
         self.beta = beta
+        self.only_train = only_train
 
     def train(self, optimizer, epoch, params_max_norm, train_data_loader, val_data_loader,
               no_train_samples, no_val_samples):
@@ -101,13 +102,19 @@ class PIRLModelTrainTest():
             del img_mem_rep_probs_arr, img_pair_probs_arr
 
         train_loss /= cnt_batches
-        val_loss, val_acc = self.test(epoch, val_data_loader, no_val_samples)
 
-        if val_loss < self.val_loss - self.threshold:
-            self.val_loss = val_loss
-            torch.save(self.network.state_dict(), self.model_file_path)
         if epoch % 10 == 0:
             torch.save(self.network.state_dict(), self.model_file_path + '_epoch_{}'.format(epoch))
+
+        if self.only_train is False:
+            val_loss, val_acc = self.test(epoch, val_data_loader, no_val_samples)
+
+            if val_loss < self.val_loss - self.threshold:
+                self.val_loss = val_loss
+                torch.save(self.network.state_dict(), self.model_file_path)
+
+        else:
+            val_loss, val_acc = 0.0, 0.0
 
         train_acc = correct / no_train_samples
 

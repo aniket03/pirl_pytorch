@@ -45,6 +45,8 @@ if __name__ == '__main__':
                         help='No of samples in memory bank of negatives')
     parser.add_argument('--beta', type=float, default=0.5, help='Exponential running average constant'
                                                                 'in memory bank update')
+    parser.add_argument('--only-train', type=bool, default=False,
+                        help='Utilize the entire unannotated STL10 dataset for training.')
     parser.add_argument('--temp-parameter', type=float, default=0.07, help='Temperature parameter in NCE probability')
     parser.add_argument('--experiment-name', type=str, default='e1_resnet18_')
     args = parser.parse_args()
@@ -73,7 +75,10 @@ if __name__ == '__main__':
     train_val_indices = list(range(len_train_val_set))
     np.random.shuffle(train_val_indices)
 
-    count_train = 70000
+    if args.only_train is False:
+        count_train = 70000
+    else:
+        count_train = 100000
 
     train_indices = train_val_indices[:count_train]
     val_indices = train_val_indices[count_train:]
