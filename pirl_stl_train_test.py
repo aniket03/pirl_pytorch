@@ -123,7 +123,7 @@ if __name__ == '__main__':
         args.temp_parameter, args.beta, args.only_train
     )
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
-    for epoch_no in range(epochs):
+    for epoch_no in range(1, epochs + 1):
         train_loss, train_acc, val_loss, val_acc = model_train_test_obj.train(
             sgd_optimizer, epoch_no, params_max_norm=4,
             train_data_loader=train_loader, val_data_loader=val_loader,

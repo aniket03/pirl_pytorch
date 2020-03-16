@@ -3,6 +3,7 @@ cifar_data/
 __pycache__
 .DS_Store
 weights/
+parse_raw_output.py
 observations_dir/
 e1_test_observations.csv
 raw_stl10/
