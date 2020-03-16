@@ -120,7 +120,7 @@ if __name__ == '__main__':
     all_images_mem = np.random.randn(len_train_val_set, 128)
     model_train_test_obj = PIRLModelTrainTest(
         model_to_train, device, model_file_path, all_images_mem, train_indices, val_indices, args.count_negatives,
-        args.temp_parameter, args.beta
+        args.temp_parameter, args.beta, args.only_train
     )
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
     for epoch_no in range(epochs):
