@@ -8,10 +8,10 @@ import numpy as np
 import pandas as pd
 
 from torch import optim
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import CosineAnnealingLr
 from torch.utils.data import SubsetRandomSampler
 
-from common_constants import PAR_WEIGHTS_DIR, PAR_OBSERVATIONS_DIR
+from common_constants import PAR_WEIGHTS_DIR
 from experiment_logger import log_experiment
 from get_dataset import GetSTL10DataForPIRL
 from models import pirl_resnet
@@ -39,7 +39,7 @@ if __name__ == '__main__':
                         help='learning rate (default: 0.01)')
     parser.add_argument('--weight-decay', type=float, default=5e-4,
                         help='Weight decay constant (default: 5e-4)')
-    parser.add_argument('--patience-for-lr-decay', type=int, default=10)
+    parser.add_argument('--tmax-for-cos-decay', type=int, default=70)
     parser.add_argument('--warm-start', type=bool, default=False)
     parser.add_argument('--count-negatives', type=int, default=6400,
                         help='No of samples in memory bank of negatives')
@@ -109,8 +109,7 @@ if __name__ == '__main__':
     # Set device on which training is done. Plus optimizer to use.
     model_to_train.to(device)
     sgd_optimizer = optim.SGD(model_to_train.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay_const)
-    scheduler = ReduceLROnPlateau(sgd_optimizer, 'min', patience=args.patience_for_lr_decay,
-                                  verbose=True, min_lr=1e-4)
+    scheduler = CosineAnnealingLr(sgd_optimizer, args.tmax_for_cos_decay, eta_min=1e-4, last_epoch=-1)
 
     # Initialize model weights with a previously trained model if using warm start
     if args.warm_start and os.path.exists(model_file_path):
@@ -133,7 +132,7 @@ if __name__ == '__main__':
         val_losses.append(val_loss)
         train_accs.append(train_acc)
         val_accs.append(val_acc)
-        scheduler.step(val_loss)
+        scheduler.step()
 
     # Log train-test results
     log_experiment(args.experiment_name, args.epochs, train_losses, val_losses, train_accs, val_accs)
