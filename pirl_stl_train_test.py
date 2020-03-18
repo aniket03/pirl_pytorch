@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from torch import optim
-from torch.optim.lr_scheduler import CosineAnnealingLr
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.utils.data import SubsetRandomSampler
 
 from common_constants import PAR_WEIGHTS_DIR
