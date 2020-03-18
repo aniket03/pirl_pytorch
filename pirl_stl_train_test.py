@@ -109,7 +109,7 @@ if __name__ == '__main__':
     # Set device on which training is done. Plus optimizer to use.
     model_to_train.to(device)
     sgd_optimizer = optim.SGD(model_to_train.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay_const)
-    scheduler = CosineAnnealingLr(sgd_optimizer, args.tmax_for_cos_decay, eta_min=1e-4, last_epoch=-1)
+    scheduler = CosineAnnealingLR(sgd_optimizer, args.tmax_for_cos_decay, eta_min=1e-4, last_epoch=-1)
 
     # Initialize model weights with a previously trained model if using warm start
     if args.warm_start and os.path.exists(model_file_path):
