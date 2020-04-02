@@ -42,6 +42,12 @@ python pirl_stl_train_test.py --model-type res18 --batch-size 128 --lr 0.1 --exp
 python train_stl_after_ssl.py --model-type res18 --batch-size 128 --lr 0.1  --patience-for-lr-decay 4 --full-fine-tune True --pirl-model-name <relative_model_path from above run>
 ```
 
+## Results
+Fine tuning strategy | Val Classification Accuracy
+--- | ---
+Only softmax layer is fine tuned |  31.87
+Full model is fine tuned | 60.67
+
 # References
 1. PIRL paper: https://arxiv.org/abs/1912.01991
 2. STL 10 dataset: http://ai.stanford.edu/~acoates/stl10/
