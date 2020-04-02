@@ -9,8 +9,9 @@ representations, while being different from that of other images, thus achieving
 
 ## Loss Function and slight modification
 The CNN used for representation learning is trained using NCE (Noise Contrastive Estimation) technique,
-NCE models the porbability of event that $(I, I^t)$ originate from the same data distribution, I.e.
-![alt text](https://docs.google.com/drawings/d/e/2PACX-1vQIBzisD1g6le_VQlfj7oeJVr98inlrBsvTzssW35MO1nxilwXa2MhkUukLli1U1Orb50_kC_XY3XCL/pub?w=240&h=48 "probability function")
+NCE models the porbability of event that I, I_t originate from the same data distribution, I.e.
+![alt text](https://docs.google.com/drawings/d/e/2PACX-1vQIBzisD1g6le_VQlfj7oeJVr98inlrBsvTzssW35MO1nxilwXa2MhkUukLli1U1Orb50_kC_XY3XCL/pub?w=480&h=96 "probability function")
+Where s(., .) is cosine similarity between v_i and v_i_t, deep representations for original and transformed image respectively.
 While, the final NCE loss is given as:
 ![alt text](https://docs.google.com/drawings/d/e/2PACX-1vRh2RjlYsPaSyGDORVN3zDl3sZ1r1g48jxW-fT8ajrGFx1rbHqyRnlepbZ63wr1K0oOCfjfndUhKA4S/pub?w=960&h=720 "L_nce")
 where f(.) and g(.) are linear function heads/
