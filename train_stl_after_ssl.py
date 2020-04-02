@@ -60,15 +60,16 @@ if __name__ == '__main__':
     print ('Train val labels count', len(train_val_labels))
 
     # Define train_set, and val_set objects
-    train_set = ConcatDataset(
-        [GetSTL10Data(train_val_file_paths, train_val_labels, def_train_transform_stl),
-         GetSTL10Data(train_val_file_paths, train_val_labels, hflip_data_transform),
-         GetSTL10Data(train_val_file_paths, train_val_labels, darkness_jitter_transform),
-         GetSTL10Data(train_val_file_paths, train_val_labels, lightness_jitter_transform),
-         GetSTL10Data(train_val_file_paths, train_val_labels, rotations_transform),
-         GetSTL10Data(train_val_file_paths, train_val_labels, all_in_transform)]
-    ),
+    # train_set = ConcatDataset(
+    #     [GetSTL10Data(train_val_file_paths, train_val_labels, def_train_transform_stl),
+    #      GetSTL10Data(train_val_file_paths, train_val_labels, hflip_data_transform),
+    #      GetSTL10Data(train_val_file_paths, train_val_labels, darkness_jitter_transform),
+    #      GetSTL10Data(train_val_file_paths, train_val_labels, lightness_jitter_transform),
+    #      GetSTL10Data(train_val_file_paths, train_val_labels, rotations_transform),
+    #      GetSTL10Data(train_val_file_paths, train_val_labels, all_in_transform)]
+    # )
 
+    train_set = GetSTL10Data(train_val_file_paths, train_val_labels, all_in_transform)
     val_set = GetSTL10Data(train_val_file_paths, train_val_labels, def_test_transform)
 
     # Define train, validation and test data loaders
