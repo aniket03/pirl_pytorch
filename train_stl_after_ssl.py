@@ -9,10 +9,12 @@ import pandas as pd
 
 from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import DataLoader, ConcatDataset
 from torch.utils.data import SubsetRandomSampler
 
 from common_constants import PAR_WEIGHTS_DIR
-from dataset_helpers import def_train_transform_stl, def_test_transform, get_file_paths_n_labels
+from dataset_helpers import def_train_transform_stl, def_test_transform, get_file_paths_n_labels, hflip_data_transform, \
+    darkness_jitter_transform, lightness_jitter_transform, rotations_transform, all_in_transform
 from experiment_logger import log_experiment
 from get_dataset import GetSTL10Data
 from models import classifier_resnet, pirl_resnet
@@ -58,7 +60,15 @@ if __name__ == '__main__':
     print ('Train val labels count', len(train_val_labels))
 
     # Define train_set, and val_set objects
-    train_set = GetSTL10Data(train_val_file_paths, train_val_labels, def_train_transform_stl)
+    train_set = ConcatDataset(
+        [GetSTL10Data(train_val_file_paths, train_val_labels, def_train_transform_stl),
+         GetSTL10Data(train_val_file_paths, train_val_labels, hflip_data_transform),
+         GetSTL10Data(train_val_file_paths, train_val_labels, darkness_jitter_transform),
+         GetSTL10Data(train_val_file_paths, train_val_labels, lightness_jitter_transform),
+         GetSTL10Data(train_val_file_paths, train_val_labels, rotations_transform),
+         GetSTL10Data(train_val_file_paths, train_val_labels, all_in_transform)]
+    ),
+
     val_set = GetSTL10Data(train_val_file_paths, train_val_labels, def_test_transform)
 
     # Define train, validation and test data loaders
