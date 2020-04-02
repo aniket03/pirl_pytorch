@@ -1,0 +1,36 @@
+# Pytorch Implementation of Pre-text Invariant Representation Learning
+This repository contains the pyotrch implementation of Pretext invariant representation learning (PIRL)
+algorithm on STL10 dataset. PIRL was originally introduced by Misra et al, publication of which can be found [here](https://arxiv.org/abs/1912.01991).
+
+## What is PIRL and why is it useful
+Pretext invariant representation learning (PIRL) is a self supervised learing algorithm that exploits contrastive
+learning to learn visual representations such that original and transformed version of the same image have similar
+representations, while being different from that of other images, thus achieving invariance to the transformation.
+
+## Loss Function and slight modification
+The CNN used for representation learning is trained using NCE (Noise Contrastive Estimation) technique,
+NCE models the porbability of event that $(I, I^t)$ originate from the same data distribution, I.e.
+![alt text](https://docs.google.com/drawings/d/e/2PACX-1vQIBzisD1g6le_VQlfj7oeJVr98inlrBsvTzssW35MO1nxilwXa2MhkUukLli1U1Orb50_kC_XY3XCL/pub?w=960&h=720 "probability function")
+While, the final NCE loss is given as:
+![alt text](https://docs.google.com/drawings/d/e/2PACX-1vRh2RjlYsPaSyGDORVN3zDl3sZ1r1g48jxW-fT8ajrGFx1rbHqyRnlepbZ63wr1K0oOCfjfndUhKA4S/pub?w=960&h=720 "L_nce")
+where f(.) and g(.) are linear function heads/
+
+## Slight Modification
+Instead of using NCE loss, for this implementation, optimization process would directly aim to minimize
+the negative log of probability described in the first equation above.
+
+## Dataset Used
+The implementation uses STL10 dataset, which can be downloaded from [here](http://ai.stanford.edu/~acoates/stl10/)
+#### Dataset setup steps
+```
+1. Download raw data from above link to ./raw_stl10/
+2. Run stl10_data_load.py. This will save three directories train, test and unlabelled in ./stl10_data/
+```
+
+## Training and evaluation steps
+```
+1. Run script pirl_stl_train_test.py for unsupervised (self supervised learning)
+Sample: python pirl_stl_train_test.py --model-type res18 --batch-size 128 --lr 0.1 --experiment-name exp
+2. Run script train_stl_after_ssl.py for fine tuning model parameters obtained from self supervised learning
+Sample: python train_stl_after_ssl.py --model-type res18 --batch-size 128 --lr 0.1  --patience-for-lr-decay 4 --full-fine-tune True --pirl-model-name <relative_model_path from above run>
+```
