@@ -72,7 +72,7 @@ if __name__ == '__main__':
     val_set = GetSTL10Data(train_val_file_paths, train_val_labels, def_test_transform)
 
     # Define train, validation and test data loaders
-    len_train_val_set = len(train_set)
+    len_train_val_set = 5000
     train_val_indices = list(range(len_train_val_set))
     np.random.shuffle(train_val_indices)
 
