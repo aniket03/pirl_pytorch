@@ -59,21 +59,8 @@ if __name__ == '__main__':
     print ('Train val file paths count', len(train_val_file_paths))
     print ('Train val labels count', len(train_val_labels))
 
-    # Define train_set, and val_set objects
-    # train_set = ConcatDataset(
-    #     [GetSTL10Data(train_val_file_paths, train_val_labels, def_train_transform_stl),
-    #      GetSTL10Data(train_val_file_paths, train_val_labels, hflip_data_transform),
-    #      GetSTL10Data(train_val_file_paths, train_val_labels, darkness_jitter_transform),
-    #      GetSTL10Data(train_val_file_paths, train_val_labels, lightness_jitter_transform),
-    #      GetSTL10Data(train_val_file_paths, train_val_labels, rotations_transform),
-    #      GetSTL10Data(train_val_file_paths, train_val_labels, all_in_transform)]
-    # )
-
-    train_set = GetSTL10Data(train_val_file_paths, train_val_labels, all_in_transform)
-    val_set = GetSTL10Data(train_val_file_paths, train_val_labels, def_test_transform)
-
-    # Define train, validation and test data loaders
-    len_train_val_set = 5000
+    # Split file paths into train and val file paths
+    len_train_val_set = len(train_val_file_paths)
     train_val_indices = list(range(len_train_val_set))
     np.random.shuffle(train_val_indices)
 
@@ -82,6 +69,25 @@ if __name__ == '__main__':
     train_indices = train_val_indices[:count_train]
     val_indices = train_val_indices[count_train:]
 
+    train_val_file_paths = np.array(train_val_file_paths)
+    train_val_labels = np.array(train_val_labels)
+    train_file_paths, train_labels = train_val_file_paths[train_indices], train_val_labels[train_indices]
+    val_file_paths, val_labels = train_val_file_paths[val_indices], train_val_labels[val_indices]
+
+    # Define train_set, and val_set objects
+    train_set = ConcatDataset(
+        [GetSTL10Data(train_file_paths, train_labels, def_train_transform_stl),
+         GetSTL10Data(train_file_paths, train_labels, hflip_data_transform),
+         GetSTL10Data(train_file_paths, train_labels, darkness_jitter_transform),
+         GetSTL10Data(train_file_paths, train_labels, lightness_jitter_transform),
+         GetSTL10Data(train_file_paths, train_labels, rotations_transform),
+         GetSTL10Data(train_file_paths, train_labels, all_in_transform)]
+    )
+
+    # train_set = GetSTL10Data(train_val_file_paths, train_val_labels, all_in_transform)
+    val_set = GetSTL10Data(val_file_paths, val_labels, def_test_transform)
+
+    # Define train, validation and test data loaders
     train_sampler = SubsetRandomSampler(train_indices)
     val_sampler = SubsetRandomSampler(val_indices)
 
