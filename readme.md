@@ -43,6 +43,9 @@ python train_stl_after_ssl.py --model-type res18 --batch-size 128 --lr 0.1  --pa
 ```
 
 ## Results
+After training the CNN model in PIRL manner, to evaluate how well learnt model weights transfer to classification
+problem in limited dataset scenario, following experiments were performed.
+
 Fine tuning strategy | Val Classification Accuracy
 --- | ---
 Only softmax layer is fine tuned |  31.87
