@@ -88,13 +88,8 @@ if __name__ == '__main__':
     val_set = GetSTL10Data(val_file_paths, val_labels, def_test_transform)
 
     # Define train, validation and test data loaders
-    train_sampler = SubsetRandomSampler(train_indices)
-    val_sampler = SubsetRandomSampler(val_indices)
-
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=train_sampler,
-                                               num_workers=8)
-    val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, sampler=val_sampler,
-                                             num_workers=8)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=128, num_workers=8)
+    val_loader = torch.utils.data.DataLoader(val_set, batch_size=100, num_workers=8)
 
     # Print sample batches that would be returned by the train_data_loader
     dataiter = iter(train_loader)
