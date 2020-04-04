@@ -46,7 +46,10 @@ if __name__ == '__main__':
     parser.add_argument('--beta', type=float, default=0.5, help='Exponential running average constant'
                                                                 'in memory bank update')
     parser.add_argument('--only-train', type=bool, default=False,
-                        help='Utilize the entire unannotated STL10 dataset for training.')
+                        help='If true utilize the entire unannotated STL10 dataset for training.')
+    parser.add_argument('--non-linear-head', type=bool, default=False,
+                        help='If true apply non-linearity to the output of function heads '
+                             'applied to resnet image representations')
     parser.add_argument('--temp-parameter', type=float, default=0.07, help='Temperature parameter in NCE probability')
     parser.add_argument('--experiment-name', type=str, default='e1_resnet18_')
     args = parser.parse_args()
@@ -104,7 +107,7 @@ if __name__ == '__main__':
     weight_decay_const = args.weight_decay
 
     # If using Resnet18
-    model_to_train = pirl_resnet(args.model_type)
+    model_to_train = pirl_resnet(args.model_type, args.non_linear_head)
 
     # Set device on which training is done. Plus optimizer to use.
     model_to_train.to(device)

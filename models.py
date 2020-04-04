@@ -51,11 +51,12 @@ def classifier_resnet(model_type, num_classes):
 
 
 class PIRLResnet(nn.Module):
-    def __init__(self, resnet_module):
+    def __init__(self, resnet_module, non_linear_head=False):
         super(PIRLResnet, self).__init__()
         self.resnet_module = resnet_module
         self.lin_project_1 = nn.Linear(512, 128)
         self.lin_project_2 = nn.Linear(128 * 9, 128)
+        self.non_linear_head = non_linear_head
 
     def forward(self, i_batch, i_t_patches_batch):
         """
@@ -81,6 +82,11 @@ class PIRLResnet(nn.Module):
 
         # Run concatenated feature vector for I_t through lin_project_2 layer
         vi_t_batch = self.lin_project_2(vi_t_patches_concatenated)
+
+        # Run final feature vectors obtained for I and I_t through non-linearity (if specified)
+        if self.non_linear_head:
+            vi_batch = F.relu(vi_batch)
+            vi_t_batch = F.relu(vi_t_batch)
 
         return vi_batch, vi_t_batch
 
