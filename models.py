@@ -91,20 +91,22 @@ class PIRLResnet(nn.Module):
         return vi_batch, vi_t_batch
 
 
-def pirl_resnet(model_type):
+def pirl_resnet(model_type, non_linear_head=False):
     """
     Returns a network which supports Pre-text invariant representation learning
     with backbone belonging to the family of ResNets
     :param model_type: Specifies which resnet network to employ. Can be one of {res18, res34, res50}
+    :param non_linear_head: If true apply non-linearity to the output of function heads
+    applied to resnet image representations
     """
 
     base_resnet_module = get_base_resnet_module(model_type)
 
-    return PIRLResnet(base_resnet_module)
+    return PIRLResnet(base_resnet_module, non_linear_head)
 
 
 if __name__ == '__main__':
-    pr = pirl_resnet('res18')
+    pr = pirl_resnet('res18', non_linear_head=True)  # non_linear_head can be True or False either.
     image_batch = torch.randn(32, 3, 64, 64)
     tr_img_patch_batch = torch.randn(32, 9, 3, 32, 32)
 
