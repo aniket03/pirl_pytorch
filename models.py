@@ -56,6 +56,7 @@ class PIRLResnet(nn.Module):
         self.resnet_module = resnet_module
         self.lin_project_1 = nn.Linear(512, 128)
         self.lin_project_2 = nn.Linear(128 * 9, 128)
+        self.lin_project_3 = nn.Linear(128, 128)  # Will only be used if non_linear_head is True
         self.non_linear_head = non_linear_head
 
     def forward(self, i_batch, i_t_patches_batch):
@@ -85,8 +86,8 @@ class PIRLResnet(nn.Module):
 
         # Run final feature vectors obtained for I and I_t through non-linearity (if specified)
         if self.non_linear_head:
-            vi_batch = F.relu(vi_batch)
-            vi_t_batch = F.relu(vi_t_batch)
+            vi_batch = self.lin_project_3(F.relu(vi_batch))
+            vi_t_batch = self.lin_project_3(F.relu(vi_t_batch))
 
         return vi_batch, vi_t_batch
 
