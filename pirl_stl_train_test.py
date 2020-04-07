@@ -51,6 +51,8 @@ if __name__ == '__main__':
                         help='If true apply non-linearity to the output of function heads '
                              'applied to resnet image representations')
     parser.add_argument('--temp-parameter', type=float, default=0.07, help='Temperature parameter in NCE probability')
+    parser.add_argument('--cont-epoch', type=int, default=1, help='Epoch to start the training from, helpful when using'
+                                                                  'warm start')
     parser.add_argument('--experiment-name', type=str, default='e1_resnet18_')
     args = parser.parse_args()
 
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Define the file_path where trained model will be saved
-    model_file_path = os.path.join(PAR_WEIGHTS_DIR, args.experiment_name)
+    model_file_path = os.path.join(PAR_WEIGHTS_DIR, args.experiment_name + '_epoch_100')
 
     # Get train_val image file_paths
     base_images_dir = 'stl10_data/unlabelled'
@@ -125,7 +127,7 @@ if __name__ == '__main__':
         args.temp_parameter, args.beta, args.only_train
     )
     train_losses, val_losses, train_accs, val_accs = [], [], [], []
-    for epoch_no in range(1, epochs + 1):
+    for epoch_no in range(args.cont_epoch, args.cont_epoch + epochs + 1):
         train_loss, train_acc, val_loss, val_acc = model_train_test_obj.train(
             sgd_optimizer, epoch_no, params_max_norm=4,
             train_data_loader=train_loader, val_data_loader=val_loader,
