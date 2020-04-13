@@ -68,7 +68,9 @@ class PIRLModelTrainTest():
 
             # Prepare memory bank of negatives for current batch
             np.random.shuffle(self.train_image_indices)
-            mn_indices = list(set(self.train_image_indices) - set(batch_img_indices))[:self.count_negatives]
+            mn_indices_all = np.array(list(set(self.train_image_indices) - set(batch_img_indices)))
+            np.random.shuffle(mn_indices_all)
+            mn_indices = mn_indices_all[:self.count_negatives]
             mn_arr = self.all_images_mem[mn_indices]
 
             # Get memory bank representation for current batch images
@@ -142,7 +144,10 @@ class PIRLModelTrainTest():
 
             # Prepare memory bank of negatives for current batch
             np.random.shuffle(self.val_image_indices)
-            mn_indices = list(set(self.val_image_indices) - set(batch_img_indices))[:self.count_negatives]
+
+            mn_indices_all = np.array(list(set(self.val_image_indices) - set(batch_img_indices)))
+            np.random.shuffle(mn_indices_all)
+            mn_indices = mn_indices_all[:self.count_negatives]
             mn_arr = self.all_images_mem[mn_indices]
 
             # Get memory bank representation for current batch images
