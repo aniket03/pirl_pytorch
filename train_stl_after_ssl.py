@@ -107,7 +107,7 @@ if __name__ == '__main__':
     model_to_train = classifier_resnet(args.model_type, num_classes=num_outputs)
     pirl_model = pirl_resnet(args.model_type)
     pirl_model.load_state_dict(torch.load(pirl_file_path, map_location=device))
-    weight_copy_success = copy_weights_between_models(model_to_train, pirl_model)
+    weight_copy_success = copy_weights_between_models(pirl_model, model_to_train)
 
     if not weight_copy_success:
         print ('Weight copy between SSL and classification net failed. Pls check !!')
