@@ -48,8 +48,8 @@ problem in limited dataset scenario, following experiments were performed.
 
 Fine tuning strategy | Val Classification Accuracy
 --- | ---
-Only softmax layer is fine tuned |  33.12
-Full model is fine tuned | 65.38
+Only softmax layer is fine tuned |  50.50
+Full model is fine tuned | 67.87
 
 # References
 1. PIRL paper: https://arxiv.org/abs/1912.01991
